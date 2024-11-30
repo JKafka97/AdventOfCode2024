@@ -8,6 +8,7 @@ This repository contains my solutions to each day's challenge during the Advent 
 
 The repository is structured as follows:
 
+```
 advent-of-code/
 ├── .github/
 │   └── workflows/
@@ -22,7 +23,7 @@ advent-of-code/
 │   └── ...                     # Other days' challenges
 ├── go.mod                      # Go module file for dependency management
 └── go.sum                      # Go sum file for dependency integrity
-
+```
 
 Each day's solution is contained in a separate folder (e.g., `day01`, `day02`) with corresponding Go files for the challenge code and tests.
 

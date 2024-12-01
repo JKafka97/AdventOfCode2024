@@ -21,16 +21,10 @@ func readFile(t *testing.T, filePath string) string {
 func TestDay1SolvePart1(t *testing.T) {
 	// Arrange
 	input := readFile(t, filePath)
-	pairs := strings.Split(input, "\r\n")
 
-	for _, pair := range pairs {
-		numbers := strings.Fields(pair)
-		firstNumber, _ := strconv.Atoi(numbers[0])
-		t.Logf("%d, %s", firstNumber, strings.Fields(pair)[1])
-	}
 	// Act
 	result, err := SolveDay1Part1(input)
-
+	t.Log(result)
 	// Assert
 	if err != nil {
 		t.Errorf("SolveDay1Part1() failed with error")
@@ -47,6 +41,7 @@ func TestDay1SolvePart2(t *testing.T) {
 
 	// Act
 	result, err := SolveDay1Part2(input)
+	t.Log(result)
 
 	// Assert
 	if err != nil {

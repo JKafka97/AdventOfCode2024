@@ -1,21 +1,53 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"strings"
+	"testing"
+)
 
-func TestSolvePart1(t *testing.T) {
-	input := "nějaký vstup"
-	expected := 14
-	result := SolvePart1(input)
+const filePath = "../inputs/inputDay1.txt"
+
+func readFile(t *testing.T, filePath string) string {
+	t.Helper()
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		t.Fatalf("Error reading file %s: %v", filePath, err)
+	}
+	return strings.ReplaceAll(string(content), "\r\n", "\n")
+}
+
+func TestDay1SolvePart1(t *testing.T) {
+	// Arrange
+	input := readFile(t, filePath)
+
+	// Act
+	result, err := SolveDay1Part1(input)
+
+	// Assert
+	if err != nil {
+		t.Errorf("SolveDay1Part1() failed with error")
+	}
+	expected := 1223326
 	if result != expected {
-		t.Errorf("Expected %d but got %d", expected, result)
+		t.Errorf("SolveDay1Part1() failed: expected %d, got %d", expected, result)
 	}
 }
 
-func TestSolvePart2(t *testing.T) {
-	input := "nějaký vstup"
-	expected := 14
-	result := SolvePart2(input)
+func TestDay1SolvePart2(t *testing.T) {
+	// Arrange
+	input := readFile(t, filePath)
+
+	// Act
+	result, err := SolveDay1Part2(input)
+	t.Log(result)
+
+	// Assert
+	if err != nil {
+		t.Errorf("SolveDay1Part2() failed with error")
+	}
+	expected := 21070419
 	if result != expected {
-		t.Errorf("Expected %d but got %d", expected, result)
+		t.Errorf("SolveDay1Part2() failed: expected %d, got %d", expected, result)
 	}
 }

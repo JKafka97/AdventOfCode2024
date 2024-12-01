@@ -23,7 +23,7 @@ func TestDay1SolvePart1(t *testing.T) {
 	pairs := strings.Split(input, "\r\n")
 
 	for _, pair := range pairs {
-		t.Log( strings.Fields(pair))
+		t.Fatalf("%s, %s", strings.Fields(pair)[0], strings.Fields(pair)[1])
 	}
 	// Act
 	result, err := SolveDay1Part1(input)

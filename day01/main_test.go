@@ -29,7 +29,7 @@ func TestDay1SolvePart1(t *testing.T) {
 	}
 	expected := 1223326
 	if result != expected {
-		t.Errorf("SolveDay1Part1() failed: expected %q, got %q", expected, result)
+		t.Errorf("SolveDay1Part1() failed: expected %d, got %d", expected, result)
 	}
 }
 
@@ -46,6 +46,6 @@ func TestDay1SolvePart2(t *testing.T) {
 	}
 	expected := 21070419
 	if result != expected {
-		t.Errorf("SolveDay1Part2() failed: expected %q, got %q", expected, result)
+		t.Errorf("SolveDay1Part2() failed: expected %d, got %d", expected, result)
 	}
 }

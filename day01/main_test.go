@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -10,7 +11,6 @@ const filePath = "../inputs/inputDay1.txt"
 func readFile(t *testing.T, filePath string) string {
 	t.Helper()
 	content, err := os.ReadFile(filePath)
-	t.Log(content)
 	if err != nil {
 		t.Fatalf("Error reading file %s: %v", filePath, err)
 	}
@@ -20,7 +20,11 @@ func readFile(t *testing.T, filePath string) string {
 func TestDay1SolvePart1(t *testing.T) {
 	// Arrange
 	input := readFile(t, filePath)
+	pairs := strings.Split(input, "\r\n")
 
+	for _, pair := range pairs {
+		t.Log( strings.Fields(pair))
+	}
 	// Act
 	result, err := SolveDay1Part1(input)
 

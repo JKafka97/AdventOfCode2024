@@ -10,6 +10,7 @@ const filePath = "../inputs/inputDay1.txt"
 func readFile(t *testing.T, filePath string) string {
 	t.Helper()
 	content, err := os.ReadFile(filePath)
+	t.Log(content)
 	if err != nil {
 		t.Fatalf("Error reading file %s: %v", filePath, err)
 	}

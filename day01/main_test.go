@@ -2,8 +2,6 @@ package main
 
 import (
 	"os"
-	"strconv"
-	"strings"
 	"testing"
 )
 

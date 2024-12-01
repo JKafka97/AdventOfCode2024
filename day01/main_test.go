@@ -14,13 +14,12 @@ func readFile(t *testing.T, filePath string) string {
 	if err != nil {
 		t.Fatalf("Error reading file %s: %v", filePath, err)
 	}
-	return string(content)
+	return strings.ReplaceAll(string(content), "\r\n", "\n")
 }
 
 func TestDay1SolvePart1(t *testing.T) {
 	// Arrange
 	input := readFile(t, filePath)
-	input = strings.ReplaceAll(input, "\r\n", "\n")
 
 	// Act
 	result, err := SolveDay1Part1(input)
@@ -38,7 +37,6 @@ func TestDay1SolvePart1(t *testing.T) {
 func TestDay1SolvePart2(t *testing.T) {
 	// Arrange
 	input := readFile(t, filePath)
-	input = strings.ReplaceAll(input, "\r\n", "\n")
 
 	// Act
 	result, err := SolveDay1Part2(input)

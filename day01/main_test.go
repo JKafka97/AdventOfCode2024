@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 )
@@ -23,7 +24,9 @@ func TestDay1SolvePart1(t *testing.T) {
 	pairs := strings.Split(input, "\r\n")
 
 	for _, pair := range pairs {
-		t.Fatalf("%s, %s", strings.Fields(pair)[0], strings.Fields(pair)[1])
+		numbers := strings.Fields(pair)
+		firstNumber, _ := strconv.Atoi(numbers[0])
+		t.Logf("%d, %s", firstNumber, strings.Fields(pair)[1])
 	}
 	// Act
 	result, err := SolveDay1Part1(input)

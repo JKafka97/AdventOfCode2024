@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -19,10 +20,11 @@ func readFile(t *testing.T, filePath string) string {
 func TestDay1SolvePart1(t *testing.T) {
 	// Arrange
 	input := readFile(t, filePath)
+	input = strings.ReplaceAll(input, "\r\n", "\n")
 
 	// Act
 	result, err := SolveDay1Part1(input)
-	t.Log(result)
+
 	// Assert
 	if err != nil {
 		t.Errorf("SolveDay1Part1() failed with error")
@@ -36,6 +38,7 @@ func TestDay1SolvePart1(t *testing.T) {
 func TestDay1SolvePart2(t *testing.T) {
 	// Arrange
 	input := readFile(t, filePath)
+	input = strings.ReplaceAll(input, "\r\n", "\n")
 
 	// Act
 	result, err := SolveDay1Part2(input)

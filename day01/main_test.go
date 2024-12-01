@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const filePath = "input.txt"
+const filePath = "../inputs/inputDay1.txt"
 
 func readFile(t *testing.T, filePath string) string {
 	t.Helper()

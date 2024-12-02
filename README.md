@@ -12,17 +12,20 @@ The repository is structured as follows:
 advent-of-code/
 ├── .github/
 │   └── workflows/
-│       └── go.yml              # GitHub Actions workflow for running tests
-├── 2024/
-│   ├── day01/
-│   │   ├── main.go             # Code for Day 1 challenge
-│   │   └── main_test.go        # Tests for Day 1
-│   ├── day02/
-│   │   ├── main.go             # Code for Day 2 challenge
-│   │   └── main_test.go        # Tests for Day 2
-│   └── ...                     # Other days' challenges
-├── go.mod                      # Go module file for dependency management
-└── go.sum                      # Go sum file for dependency integrity
+│       └── go.yml              # GitHub Actions workflow for running tests and CI
+├── day01/
+│   ├── main.go                 # Implementation for the Day 1 challenge
+│   └── main_test.go            # Unit tests for the Day 1 challenge
+├── day02/
+│   ├── main.go                 # Implementation for the Day 2 challenge
+│   └── main_test.go            # Unit tests for the Day 2 challenge
+├── ...                         # Additional directories for subsequent days' challenges
+├── shared/                     # Contains shared logic or utility functions used across multiple days
+├── inputs/ 
+│   ├── inputDay1.txt           # Input data for the Day 1 challenge
+│   └── ...                     # Input data for other days
+├── go.mod                      # Go module file, defines project dependencies and module path
+└── go.sum                      # Go checksum file, ensures dependency integrity and version consistency
 ```
 
 Each day's solution is contained in a separate folder (e.g., `day01`, `day02`) with corresponding Go files for the challenge code and tests.

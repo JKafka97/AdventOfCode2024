@@ -1,25 +1,15 @@
 package main
 
 import (
-	"os"
-	"strings"
+	helper "advent-of-code/shared"
 	"testing"
 )
 
 const filePath = "../inputs/inputDay1.txt"
 
-func readFile(t *testing.T, filePath string) string {
-	t.Helper()
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		t.Fatalf("Error reading file %s: %v", filePath, err)
-	}
-	return strings.ReplaceAll(string(content), "\r\n", "\n")
-}
-
 func TestDay1SolvePart1(t *testing.T) {
 	// Arrange
-	input := readFile(t, filePath)
+	input := helper.ReadFile(t, filePath)
 
 	// Act
 	result, err := SolveDay1Part1(input)
@@ -36,7 +26,7 @@ func TestDay1SolvePart1(t *testing.T) {
 
 func TestDay1SolvePart2(t *testing.T) {
 	// Arrange
-	input := readFile(t, filePath)
+	input := helper.ReadFile(t, filePath)
 
 	// Act
 	result, err := SolveDay1Part2(input)

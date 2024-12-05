@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func SolveDay1Part1(input string) (int, error) {
+func SolutionForPart1(input string) (int, error) {
 	pairs := strings.Split(input, "\n")
 	firstRow := make([]int, 0)
 	secondRow := make([]int, 0)
@@ -32,7 +32,7 @@ func SolveDay1Part1(input string) (int, error) {
 	return result, nil
 }
 
-func SolveDay1Part2(input string) (int, error) {
+func SolutionForPart2(input string) (int, error) {
 	pairs := strings.Split(input, "\n")
 	firstRow := make([]int, 0)
 	secondRow := make([]int, 0)

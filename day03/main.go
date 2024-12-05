@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-// SolveDay3Part1 computes the sum of products from "mul(x, y)" in the input.
-func SolveDay3Part1(input string) (int, error) {
+func SolutionForPart1(input string) (int, error) {
 	re := regexp.MustCompile(`mul\((\d{1,3}),(\d{1,3})\)`)
 	result := 0
 	for _, match := range re.FindAllStringSubmatch(input, -1) {
@@ -18,7 +17,7 @@ func SolveDay3Part1(input string) (int, error) {
 	return result, nil
 }
 
-func SolveDay3Part2(input string) (int, error) {
+func SolutionForPart2(input string) (int, error) {
 	rows := strings.Split(input, "\n")
 	result := 0
 

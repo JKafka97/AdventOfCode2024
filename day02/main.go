@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func SolveDay2Part1(input string) (int, error) {
+func SolutionForPart1(input string) (int, error) {
 	pairs := strings.Split(input, "\n")
 	result := 0
 	for _, pair := range pairs {
@@ -33,7 +33,7 @@ func SolveDay2Part1(input string) (int, error) {
 	return result, nil
 }
 
-func SolveDay2Part2(input string) (int, error) {
+func SolutionForPart2(input string) (int, error) {
 	rows := strings.Split(input, "\n")
 	result := 0
 

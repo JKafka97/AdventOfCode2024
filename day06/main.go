@@ -12,64 +12,48 @@ const (
 	Left  = '<'
 )
 
-var directionVectors = map[rune][2]int{
-	Up:    {0, -1},
-	Right: {1, 0},
-	Down:  {0, 1},
-	Left:  {-1, 0},
-}
-
-var turnRight = map[rune]rune{
-	Up:    Right,
-	Right: Down,
-	Down:  Left,
-	Left:  Up,
+var directions = [][2]int{
+	{-1, 0}, // Up
+	{0, 1},  // Right
+	{1, 0},  // Down
+	{0, -1}, // Left
 }
 
 func SolutionForPart1(input string) (int, error) {
-	if input == "" {
-		return 0, errors.New("input cannot be empty")
-	}
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+	n, m := len(lines), len(lines[0])
 
-	rows := strings.Split(input, "\n")
-	height := len(rows)
-	if height == 0 || len(rows[0]) == 0 {
-		return 0, errors.New("invalid grid dimensions")
-	}
+	var startRow, startCol int
+	found := false
 
-	width := len(rows[0])
-	var guardX, guardY int
-	var direction rune
-	obstacles := make(map[[2]int]bool)
-
-	for y, row := range rows {
-		for x, char := range row {
-			switch char {
-			case Up, Right, Down, Left:
-				guardX, guardY = x, y
-				direction = char
-			case '#':
-				obstacles[[2]int{x, y}] = true
+	for i := 0; i < n && !found; i++ {
+		for j := 0; j < m; j++ {
+			if lines[i][j] == '^' {
+				startRow, startCol = i, j
+				found = true
+				break
 			}
 		}
 	}
 
+	i, j := startRow, startCol
+	dirIndex := 0
 	visited := make(map[[2]int]bool)
-	visited[[2]int{guardX, guardY}] = true
 
 	for {
-		dx, dy := directionVectors[direction][0], directionVectors[direction][1]
-		nextX, nextY := guardX+dx, guardY+dy
+		visited[[2]int{i, j}] = true
 
-		if nextX < 0 || nextX >= width || nextY < 0 || nextY >= height {
+		nextI := i + directions[dirIndex][0]
+		nextJ := j + directions[dirIndex][1]
+
+		if nextI < 0 || nextI >= n || nextJ < 0 || nextJ >= m {
 			break
 		}
 
-		if obstacles[[2]int{nextX, nextY}] {
-			direction = turnRight[direction] // Turn right on obstacle
+		if lines[nextI][nextJ] == '#' {
+			dirIndex = (dirIndex + 1) % 4
 		} else {
-			guardX, guardY = nextX, nextY // Move forward
-			visited[[2]int{guardX, guardY}] = true
+			i, j = nextI, nextJ
 		}
 	}
 
@@ -77,24 +61,18 @@ func SolutionForPart1(input string) (int, error) {
 }
 
 func SolutionForPart2(input string) (int, error) {
-	if input == "" {
-		return 0, errors.New("input cannot be empty")
-	}
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+	n, m := len(lines), len(lines[0])
 
-	lines := strings.Split(input, "\n")
-	n := len(lines)
-	if n == 0 || len(lines[0]) == 0 {
-		return 0, errors.New("invalid grid dimensions")
-	}
-
-	m := len(lines[0])
 	grid := make([][]rune, n)
 	for i := range lines {
 		grid[i] = []rune(lines[i])
 	}
 
-	startRow, startCol, found := -1, -1, false
-	for i := 0; i < n; i++ {
+	var startRow, startCol int
+	found := false
+
+	for i := 0; i < n && !found; i++ {
 		for j := 0; j < m; j++ {
 			if grid[i][j] == Up {
 				startRow, startCol = i, j
@@ -102,30 +80,20 @@ func SolutionForPart2(input string) (int, error) {
 				break
 			}
 		}
-		if found {
-			break
-		}
 	}
 
 	if !found {
 		return 0, errors.New("no guard starting position found")
 	}
 
-	directions := [][2]int{
-		{-1, 0}, // Up
-		{0, 1},  // Right
-		{1, 0},  // Down
-		{0, -1}, // Left
-	}
-
 	dirIndex := 0
-	observedPositions := make(map[[2]int]bool)
 	i, j := startRow, startCol
+	originalVisited := make(map[[2]int]bool)
 
 	for {
-		observedPositions[[2]int{i, j}] = true
-		nextI := i + directions[dirIndex][0]
-		nextJ := j + directions[dirIndex][1]
+		originalVisited[[2]int{i, j}] = true
+
+		nextI, nextJ := i+directions[dirIndex][0], j+directions[dirIndex][1]
 
 		if nextI < 0 || nextI >= n || nextJ < 0 || nextJ >= m {
 			break
@@ -143,24 +111,24 @@ func SolutionForPart2(input string) (int, error) {
 			return false
 		}
 
-		grid[oi][oj] = '#'
-		i, j := startRow, startCol
-		dirIndex := 0
+		original := grid[oi][oj]
+		grid[oi][oj] = '#' // Temporarily place an obstacle
+
+		i, j, dirIndex := startRow, startCol, 0
 		seenStates := make(map[[3]int]bool)
 
 		for {
-			if seenStates[[3]int{i, j, dirIndex}] {
-				grid[oi][oj] = '.' // Restore original state
+			state := [3]int{i, j, dirIndex}
+			if seenStates[state] {
+				grid[oi][oj] = original // Restore the grid
 				return true
 			}
-			seenStates[[3]int{i, j, dirIndex}] = true
+			seenStates[state] = true
 
-			nextI := i + directions[dirIndex][0]
-			nextJ := j + directions[dirIndex][1]
+			nextI, nextJ := i+directions[dirIndex][0], j+directions[dirIndex][1]
 
 			if nextI < 0 || nextI >= n || nextJ < 0 || nextJ >= m {
-				grid[oi][oj] = '.' // Restore original state
-				return false
+				break
 			}
 
 			if grid[nextI][nextJ] == '#' {
@@ -169,14 +137,21 @@ func SolutionForPart2(input string) (int, error) {
 				i, j = nextI, nextJ
 			}
 		}
+
+		grid[oi][oj] = original // Restore the grid
+		return false
 	}
 
 	loopCount := 0
-	for pos := range observedPositions {
-		if isLoop(pos[0], pos[1]) {
+	for pos := range originalVisited {
+		oi, oj := pos[0], pos[1]
+		if oi == startRow && oj == startCol {
+			continue // Cannot place obstacle where the guard starts
+		}
+		if isLoop(oi, oj) {
 			loopCount++
 		}
 	}
 
-	return loopCount - 1, nil
+	return loopCount, nil
 }

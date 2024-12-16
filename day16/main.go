@@ -2,78 +2,67 @@ package main
 
 import (
 	"bufio"
+	"container/heap"
 	"strings"
 )
 
-type Point struct {
-	x, y int
+type Point struct{ x, y int }
+type State struct{ loc, dir Point }
+type Point2 struct {
+	row, col int
+	dir      rune
 }
-
-type State struct {
-	loc Point
-	dir Point
+type Item struct {
+	distance int
+	point    Point2
 }
+type PriorityQueue []*Item
 
-const (
-	inf = 1 << 30 // A large number to represent infinity
-)
+var directions = []Point{{-1, 0}, {0, 1}, {1, 0}, {0, -1}} // N, E, S, W
 
-var directions = []Point{
-	{-1, 0}, {0, 1}, {1, 0}, {0, -1},
-}
-
-func add(p1, p2 Point) Point {
-	return Point{p1.x + p2.x, p1.y + p2.y}
-}
+func add(p1, p2 Point) Point { return Point{p1.x + p2.x, p1.y + p2.y} }
 
 func nextStates(state State) map[State]int {
-	loc := state.loc
-	d := state.dir
-	// Normal move (cost 1), turn left or right (cost 1000)
+	loc, d := state.loc, state.dir
 	return map[State]int{
-		{add(loc, d), d}:        1,    // Move forward (cost 1)
-		{loc, Point{-d.y, d.x}}: 1000, // Turn left (cost 1000)
-		{loc, Point{d.y, -d.x}}: 1000, // Turn right (cost 1000)
+		{add(loc, d), d}:        1,
+		{loc, Point{-d.y, d.x}}: 1000,
+		{loc, Point{d.y, -d.x}}: 1000,
 	}
 }
 
 func prevStates(state State) map[State]int {
-	loc := state.loc
-	d := state.dir
-	// Reversing the direction (cost 1), turn left or right (cost 1000)
+	loc, d := state.loc, state.dir
 	return map[State]int{
-		{add(loc, Point{-d.x, -d.y}), d}: 1,    // Move backward (cost 1)
-		{loc, Point{-d.y, d.x}}:          1000, // Turn left (cost 1000)
-		{loc, Point{d.y, -d.x}}:          1000, // Turn right (cost 1000)
+		{add(loc, Point{-d.x, -d.y}), d}: 1,
+		{loc, Point{-d.y, d.x}}:          1000,
+		{loc, Point{d.y, -d.x}}:          1000,
 	}
 }
 
-func solve(fileName string) (int, int) {
+func solve(fileName string) int {
 	scanner := bufio.NewScanner(strings.NewReader(fileName))
 	grid := make(map[Point]rune)
-	var start Point
-	var end Point
+	var start, end Point
 	y := 0
+
 	for scanner.Scan() {
-		line := scanner.Text()
-		for x, c := range line {
+		for x, c := range scanner.Text() {
 			grid[Point{x, y}] = c
 			if c == 'S' {
 				start = Point{x, y}
-			} else if c == 'E' {
+			}
+			if c == 'E' {
 				end = Point{x, y}
 			}
 		}
 		y++
 	}
 
-	initState := State{start, directions[1]} // Start facing East (index 1)
-	states := make(map[State]int)
-	states[initState] = 0
-
+	initState := State{start, directions[1]}
+	states := map[State]int{initState: 0}
 	toUpdate := map[State]struct{}{initState: {}}
 
-	// Part 1: Dijkstra-like search to find the minimal cost
 	for len(toUpdate) > 0 {
 		var current State
 		for s := range toUpdate {
@@ -83,9 +72,7 @@ func solve(fileName string) (int, int) {
 		}
 
 		cost := states[current]
-		newStates := nextStates(current)
-
-		for newState, costIncrease := range newStates {
+		for newState, costIncrease := range nextStates(current) {
 			newLoc := newState.loc
 			if grid[newLoc] == '#' {
 				continue
@@ -98,21 +85,8 @@ func solve(fileName string) (int, int) {
 		}
 	}
 
-	// Find minimum cost for reaching the end state
-	endState := State{}
-	minCost := inf
-	for _, d := range directions {
-		stateCandidate := State{end, d}
-		if cost, exists := states[stateCandidate]; exists && cost < minCost {
-			minCost = cost
-			endState = stateCandidate
-		}
-	}
-	p1 := minCost
-
-	// Part 2: Trace back the path to count how many locations were on the shortest path
 	locsOnPath := map[Point]struct{}{end: {}}
-	toCheck := map[State]struct{}{endState: {}}
+	toCheck := map[State]struct{}{{end, directions[1]}: {}}
 
 	for len(toCheck) > 0 {
 		var current State
@@ -123,31 +97,121 @@ func solve(fileName string) (int, int) {
 		}
 
 		cost := states[current]
-
 		for prevState, costIncrease := range prevStates(current) {
 			prevLoc := prevState.loc
-
 			if grid[prevLoc] == '#' {
 				continue
 			}
-
 			if prevCost, exists := states[prevState]; exists && prevCost+costIncrease == cost {
 				toCheck[prevState] = struct{}{}
 				locsOnPath[prevLoc] = struct{}{}
 			}
 		}
 	}
+	return len(locsOnPath)
+}
 
-	p2 := len(locsOnPath)
-	return p1, p2
+func (pq PriorityQueue) Len() int           { return len(pq) }
+func (pq PriorityQueue) Less(i, j int) bool { return pq[i].distance < pq[j].distance }
+func (pq PriorityQueue) Swap(i, j int)      { pq[i], pq[j] = pq[j], pq[i] }
+func (pq *PriorityQueue) Push(x interface{}) {
+	item := x.(*Item)
+	*pq = append(*pq, item)
+}
+func (pq *PriorityQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
+	*pq = old[:n-1]
+	return item
+}
+
+func parse(lines []string) ([][]rune, Point2, Point2) {
+	grid := make([][]rune, len(lines))
+	var start, end Point2
+
+	for r, line := range lines {
+		grid[r] = []rune(strings.TrimSpace(line))
+		for c, ch := range grid[r] {
+			if ch == 'S' {
+				start = Point2{r, c, 'E'}
+			}
+			if ch == 'E' {
+				end = Point2{r, c, 'E'}
+			}
+		}
+	}
+	return grid, start, end
+}
+
+func dijkstra(grid [][]rune, starts []Point2) map[Point2]int {
+	delta := map[rune][2]int{'E': {0, 1}, 'W': {0, -1}, 'N': {-1, 0}, 'S': {1, 0}}
+	dist := make(map[Point2]int)
+	pq := &PriorityQueue{}
+
+	for _, start := range starts {
+		dist[start] = 0
+		heap.Push(pq, &Item{distance: 0, point: start})
+	}
+
+	for pq.Len() > 0 {
+		item := heap.Pop(pq).(*Item)
+		current := item.point
+
+		if dist[current] < item.distance {
+			continue
+		}
+
+		for _, nextDir := range "EWNS" {
+			if nextDir != current.dir {
+				nextPoint := Point2{current.row, current.col, nextDir}
+				if _, exists := dist[nextPoint]; !exists || dist[nextPoint] > item.distance+1000 {
+					dist[nextPoint] = item.distance + 1000
+					heap.Push(pq, &Item{distance: dist[nextPoint], point: nextPoint})
+				}
+			}
+		}
+
+		dr, dc := delta[current.dir][0], delta[current.dir][1]
+		nextRow, nextCol := current.row+dr, current.col+dc
+
+		if nextRow >= 0 && nextRow < len(grid) && nextCol >= 0 && nextCol < len(grid[0]) && grid[nextRow][nextCol] != '#' {
+			nextPoint := Point2{nextRow, nextCol, current.dir}
+			if _, exists := dist[nextPoint]; !exists || dist[nextPoint] > item.distance+1 {
+				dist[nextPoint] = item.distance + 1
+				heap.Push(pq, &Item{distance: dist[nextPoint], point: nextPoint})
+			}
+		}
+	}
+
+	return dist
+}
+
+func part1(input [][]rune, start Point2, end Point2) int {
+	distances := dijkstra(input, []Point2{start})
+	bestDistance := int(1e9)
+
+	for _, dir := range "EWNS" {
+		if distance, exists := distances[Point2{end.row, end.col, rune(dir)}]; exists {
+			bestDistance = min(bestDistance, distance)
+		}
+	}
+	return bestDistance
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func SolutionForPart1(input string) (int, error) {
-	solution, _ := solve(input)
-	return solution, nil
+	lines := strings.Split(input, "\n")
+	grid, start, end := parse(lines)
+	return part1(grid, start, end), nil
 }
 
 func SolutionForPart2(input string) (int, error) {
-	_, solution := solve(input)
-	return solution, nil
+	return solve(input), nil
 }

@@ -8,7 +8,7 @@ import (
 const dayNumber = 16
 
 func TestSolutionForPart1(t *testing.T) {
-	helper.TestAdventOfCodeSolution(t, 110496, dayNumber, 1, SolutionForPart1)
+	helper.TestAdventOfCodeSolution(t, 109496, dayNumber, 1, SolutionForPart1)
 }
 
 func TestSolutionForPart2(t *testing.T) {

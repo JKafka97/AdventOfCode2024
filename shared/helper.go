@@ -31,3 +31,19 @@ func TestAdventOfCodeSolution(t *testing.T, expectedResult int, dayNumber int, p
 		t.Errorf("TestDay %d SolvePart %d failed: expected %d, got %d", dayNumber, partNumber, expectedResult, result)
 	}
 }
+
+func TestAdventOfCodeSolutionString(t *testing.T, expectedResult string, dayNumber int, partNumber int, solver func(string) (string, error)) {
+	// Arrange
+	input := ReadFile(t, fmt.Sprintf("../inputs/inputDay%d.txt", dayNumber))
+
+	// Act
+	result, err := solver(input)
+
+	// Assert
+	if err != nil {
+		t.Errorf("TestSolvePart1() failed with error")
+	}
+	if result != expectedResult {
+		t.Errorf("TestDay %d SolvePart %d failed: expected %s, got %s", dayNumber, partNumber, expectedResult, result)
+	}
+}

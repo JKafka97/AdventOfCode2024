@@ -12,140 +12,138 @@ import (
 type adjacencyList map[string][]string
 
 func SolutionForPart1(input string) (int, error) {
-	value, dependencies := parseInput(input)
-
-	return partOne(value, dependencies), nil
+	wireValues, wireDependencies := parseInput(input)
+	return calculatePartOne(wireValues, wireDependencies), nil
 }
 
 func SolutionForPart2(input string) (string, error) {
-	_, dependencies := parseInput(input)
-
-	return partTwo(dependencies), nil
+	_, wireDependencies := parseInput(input)
+	return calculatePartTwo(wireDependencies), nil
 }
 
-type dependency struct {
-	w1, w2 string
-	op     string
+type wireDependency struct {
+	wire1, wire2 string
+	operation    string
 }
 
-func parseInput(input string) (map[string]int8, map[string]dependency) {
-	instrRegex := regexp.MustCompile(`([a-z0-9]*) ([A-Z]*) ([a-z0-9]*) -> ([a-z0-9]*)`)
+func parseInput(input string) (map[string]int8, map[string]wireDependency) {
+	instructionRegex := regexp.MustCompile(`([a-z0-9]*) ([A-Z]*) ([a-z0-9]*) -> ([a-z0-9]*)`)
 	wireValueRegex := regexp.MustCompile(`([a-zA-Z0-9]*): ([0-9])`)
 
-	sc := bufio.NewScanner(strings.NewReader(input))
+	scanner := bufio.NewScanner(strings.NewReader(input))
 
-	value := make(map[string]int8)
-	dependencies := make(map[string]dependency)
+	wireValues := make(map[string]int8)
+	wireDependencies := make(map[string]wireDependency)
 
-	for sc.Scan() && sc.Text() != "" {
-		matches := wireValueRegex.FindStringSubmatch(sc.Text())
-		w := matches[1]
-		v := int8(matches[2][0] - '0')
-		value[w] = v
+	for scanner.Scan() && scanner.Text() != "" {
+		matches := wireValueRegex.FindStringSubmatch(scanner.Text())
+		wire := matches[1]
+		value := int8(matches[2][0] - '0')
+		wireValues[wire] = value
 	}
 
-	for sc.Scan() {
-		matches := instrRegex.FindStringSubmatch(sc.Text())
-		w := matches[4]
-		op := matches[2]
-		w1, w2 := matches[1], matches[3]
+	for scanner.Scan() {
+		matches := instructionRegex.FindStringSubmatch(scanner.Text())
+		wire := matches[4]
+		operation := matches[2]
+		wire1, wire2 := matches[1], matches[3]
 
-		dependencies[w] = dependency{
-			w1: w1,
-			w2: w2,
-			op: op,
+		wireDependencies[wire] = wireDependency{
+			wire1:     wire1,
+			wire2:     wire2,
+			operation: operation,
 		}
 	}
 
-	return value, dependencies
+	return wireValues, wireDependencies
 }
 
-func partOne(value map[string]int8, dependencies map[string]dependency) (res int) {
-	var resolve func(string) int8
+func calculatePartOne(wireValues map[string]int8, wireDependencies map[string]wireDependency) (result int) {
+	var resolveWireValue func(string) int8
 
-	resolve = func(curr string) int8 {
-		if v, ok := value[curr]; ok {
-			return v
+	resolveWireValue = func(currentWire string) int8 {
+		if value, exists := wireValues[currentWire]; exists {
+			return value
 		}
 
-		d := dependencies[curr]
-		v1 := resolve(d.w1)
-		v2 := resolve(d.w2)
+		dependency := wireDependencies[currentWire]
+		value1 := resolveWireValue(dependency.wire1)
+		value2 := resolveWireValue(dependency.wire2)
 
-		switch d.op {
+		switch dependency.operation {
 		case "XOR":
-			value[curr] = v1 ^ v2
+			wireValues[currentWire] = value1 ^ value2
 		case "AND":
-			value[curr] = v1 & v2
+			wireValues[currentWire] = value1 & value2
 		case "OR":
-			value[curr] = v1 | v2
+			wireValues[currentWire] = value1 | value2
 		}
 
-		return value[curr]
+		return wireValues[currentWire]
 	}
 
-	for n := range dependencies {
-		resolve(n)
+	for wire := range wireDependencies {
+		resolveWireValue(wire)
 	}
 
-	for n, v := range value {
-		if n[0] == 'z' {
-			temp, _ := strconv.Atoi(n[1:])
-			res |= int(v) << temp
+	for wire, value := range wireValues {
+		if wire[0] == 'z' {
+			position, _ := strconv.Atoi(wire[1:])
+			result |= int(value) << position
 		}
 	}
 
 	return
 }
 
-func partTwo(dependencies map[string]dependency) (res string) {
-	temp := make(map[string]bool)
+func calculatePartTwo(wireDependencies map[string]wireDependency) (result string) {
+	validWires := make(map[string]bool)
 
-	for w, d := range dependencies {
-		if w[0] == 'z' {
-			val, _ := strconv.Atoi(w[1:])
-			if d.op != "XOR" && val != 45 {
-				temp[w] = true
+	for wire, dependency := range wireDependencies {
+		if wire[0] == 'z' {
+			position, _ := strconv.Atoi(wire[1:])
+			if dependency.operation != "XOR" && position != 45 {
+				validWires[wire] = true
 			}
-		} else if !isXOrY(d.w1) && !isXOrY(d.w2) && d.w1[0] != d.w2[0] && d.op == "XOR" {
-			temp[w] = true
+		} else if !isWireXOrY(dependency.wire1) && !isWireXOrY(dependency.wire2) && dependency.wire1[0] != dependency.wire2[0] && dependency.operation == "XOR" {
+			validWires[wire] = true
 		}
 
-		if d.op == "XOR" && isXOrY(d.w1) && isXOrY(d.w2) && d.w1[0] != d.w2[0] {
+		if dependency.operation == "XOR" && isWireXOrY(dependency.wire1) && isWireXOrY(dependency.wire2) && dependency.wire1[0] != dependency.wire2[0] {
 			isValid := false
-			for _, dp := range dependencies {
-				if dp.op == "XOR" && (dp.w1 == w || dp.w2 == w) {
+			for _, dep := range wireDependencies {
+				if dep.operation == "XOR" && (dep.wire1 == wire || dep.wire2 == wire) {
 					isValid = true
 				}
 			}
 			if !isValid {
-				temp[w] = true
+				validWires[wire] = true
 			}
 		}
 
-		if d.op == "AND" && isXOrY(d.w1) && isXOrY(d.w2) && d.w1[0] != d.w2[0] {
+		if dependency.operation == "AND" && isWireXOrY(dependency.wire1) && isWireXOrY(dependency.wire2) && dependency.wire1[0] != dependency.wire2[0] {
 			isValid := false
-			for _, dp := range dependencies {
-				if dp.op == "OR" && (dp.w1 == w || dp.w2 == w) {
+			for _, dep := range wireDependencies {
+				if dep.operation == "OR" && (dep.wire1 == wire || dep.wire2 == wire) {
 					isValid = true
 				}
 			}
 			if !isValid {
-				temp[w] = true
+				validWires[wire] = true
 			}
 		}
 	}
-	ans := slices.Collect(maps.Keys(temp))
-	slices.Sort(ans)
+	sortedWires := slices.Collect(maps.Keys(validWires))
+	slices.Sort(sortedWires)
 
-	for _, w := range ans {
-		res += w + ","
+	for _, wire := range sortedWires {
+		result += wire + ","
 	}
 
-	return res[:len(res)-1]
+	return result[:len(result)-1]
 }
 
-func isXOrY(wire string) bool {
-	temp, _ := strconv.Atoi(wire[1:])
-	return (wire[0] == 'x' || wire[0] == 'y') && temp != 0
+func isWireXOrY(wire string) bool {
+	position, _ := strconv.Atoi(wire[1:])
+	return (wire[0] == 'x' || wire[0] == 'y') && position != 0
 }

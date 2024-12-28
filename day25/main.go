@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-type adjacencyList map[string][]string
-
 func SolutionForPart1(input string) (int, error) {
 	locks, keys := parseInput(input)
 	return calculatePartOne(locks, keys), nil

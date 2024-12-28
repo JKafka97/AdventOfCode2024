@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-type adjacencyList map[string][]string
-
 func SolutionForPart1(input string) (int, error) {
 	wireValues, wireDependencies := parseInput(input)
 	return calculatePartOne(wireValues, wireDependencies), nil
